@@ -1,0 +1,61 @@
+name: Deploy Backend
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'infra/**'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Set Up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.8'
+
+      - name: Install Dependencies
+        run: pip install -r infra/lambda/requirements.txt
+
+      - name: Run Tests
+        run: pytest infra/lambda/test_api.py
+
+  deploy:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: eu-north-1
+
+      - name: Set Up Pulumi
+        uses: pulumi/actions@v4
+        with:
+          pulumi-version: latest
+
+      - name: Install Python Dependencies
+        run: pip install -r infra/requirements.txt
+        working-directory: infra/
+
+      - name: Initialize Pulumi Stack
+        run: pulumi stack select dev || pulumi stack init dev
+        working-directory: infra/
+
+      - name: Preview Pulumi Changes
+        run: pulumi preview
+        working-directory: infra/
+
+      - name: Apply Pulumi Changes
+        run: pulumi up --yes
+        working-directory: infra/
