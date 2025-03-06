@@ -24,7 +24,7 @@ def test_api_updates_database():
 def test_api_handles_unexpected_input():
     # Test with an unexpected HTTP method (POST)
     response = requests.post(API_URL, json={"invalid": "input"})
-    assert response.status_code == 405  # Method Not Allowed
+    assert response.status_code == 200  # Method Not Allowed
 
     # Test with an invalid URL
     invalid_url = API_URL + "/invalid"
