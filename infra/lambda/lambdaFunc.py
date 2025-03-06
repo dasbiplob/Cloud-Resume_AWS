@@ -14,6 +14,26 @@ dynamodb = boto3.resource('dynamodb')
 table = dynamodb.Table('cloudresume-test')
 
 def lambda_handler(event, context):
+    # Check the HTTP method
+    http_method = event.get('requestContext', {}).get('http', {}).get('method', 'GET')
+
+    # Check the path
+    path = event.get('rawPath', '/')  # Get the path from the event
+
+    # Handle invalid paths
+    if path != '/':
+        return {
+            'statusCode': 404,
+            'body': json.dumps({'error': 'Not Found'})
+        }
+
+    # Handle invalid HTTP methods
+    if http_method != 'GET':
+        return {
+            'statusCode': 405,
+            'body': json.dumps({'error': 'Method Not Allowed'})
+        }
+
     # Fetch current views
     response = table.get_item(Key={'id': '0'})
 
