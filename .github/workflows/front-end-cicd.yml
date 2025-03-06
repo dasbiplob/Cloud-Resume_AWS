@@ -20,7 +20,7 @@ jobs:
         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         AWS_REGION: 'eu-north-1'
         SOURCE_DIR: 'iPortfolio-1.0.0'
-    - name: Invalidate CloudFront Cache
+    - name: Invalidate CloudFront Cache 
       run: |
         aws cloudfront create-invalidation --distribution-id ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }} --paths "/*"
       env:
